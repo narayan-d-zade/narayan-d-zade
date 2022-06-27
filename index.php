@@ -1,90 +1,71 @@
 <?php 
-// 0,1,1,2,3,5,8,13,,,
+if (isset($_GET['Yes'])){
 
 
-// $(document).ready(function(){
+include "db.php";
 
-// 	$('input[type=checkbox]').filter(':even').attr('checked', true);
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, 'https://au.api.trends.nz/api/v1/categories.json');
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+curl_setopt($ch, CURLOPT_USERPWD, "sales@starpromotions.com.au:SnuNhKMKTOFp");
+$response = curl_exec($ch);
+curl_close($ch);
 
-// });
+$responses = json_decode($response,TRUE);
 
-// class test{
-
-// public function position($pos){
-
-// 				$n1=0;  
-// 			$n2=1;
-
-// 			$x=0;
-
-// 			$limit=$pos;
-// 			$a = array();
-//            for($i=0; $i<=$limit;$i++){
+// print_r($response);
 
 
-// 			array_push($a, $n1);
+// echo count($responses['data']);
 
-// 			$n1=$n1+$n2;
-// 			$n2=$x; 
+foreach($responses['data'] as $data)  {
 
-// 			$x=$n1; 
+	$numbers = $data['number'];
+	$name = $data['name'];
+	$mps_category = $data['mps_category'];
+	$xebra_code_1 = $data['xebra_code_1'];
+	$xebra_code_2 = $data['xebra_code_2'];
 
-
-// 			}
-
-// 					if($a[$pos]){
-
-// 						return $a[$pos];
-// 					}else{
-
-// 						return "not found";
-// 					}
-	
-// 	}
-// }
-
-// $obj = new test();
-
-// echo $obj->position(10); // pass any position 
+   $sql = "INSERT INTO data (numbers, name, mps_category,xebra_code_1,xebra_code_2) VALUES ('".$numbers."', '".$name."','".$mps_category."', '".$xebra_code_1."', '".$xebra_code_2."')";
 
 
-class test{
+		if(mysqli_query($link, $sql)){
 
-	public function show($limit){
+			foreach ($data['sub_categories'] as $category ) {
 
-			$n1=0;
-			$n2=1;
-            $temp=0;
-
-			$a= array();
-
-			for($i=0;$i<$limit+1;$i++){             
-
-			array_push($a, $n1);
-
-            $n1=$n1+$n2; 
-
-			$n2=$temp;
-
-			$temp= $n1;
-			
-			}
-
-			if($a[$limit]>0){
-
-				return $a[$limit];
-
-			}else{
-				return "Not Found";
-			}
+		$numbers_fk = $data['number'];
+		$numbers = $category['number'];
+		$name = $category['name'];
+		$mps_category = $category['mps_category'];
+		$xebra_code_1 = $category['xebra_code_1'];
+		$xebra_code_2 = $category['xebra_code_2'];
 		
-			}
 
+
+		$sql = "INSERT INTO sub_categories (numbers_fk, numbers, name,mps_category,xebra_code_1,xebra_code_2) VALUES ('".$numbers_fk."', '".$numbers."','".$name."', '".$mps_category."', '".$xebra_code_1."', '".$xebra_code_2."')";
+
+			if(mysqli_query($link, $sql)){
+
+		
+		}
+		
+		 echo ("<SCRIPT LANGUAGE='JavaScript'>
+                                window.alert('Congratulations, Your API`s Data has been successfully imported')
+                                window.location.href='dashboard.php';
+                                </SCRIPT>");
+
+		}
+
+
+
+		}
+	
 }
-
-$obj = new  test();
-
-echo $obj->show(4);
+}
+else{
+	
+	 echo ("<SCRIPT LANGUAGE='JavaScript'>window.location.href='dashboard.php';</SCRIPT>");
+}
 
 
 ?>
